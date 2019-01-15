@@ -139,6 +139,25 @@ namespace Panothelo
             return allOK;
         }
 
+        public List<int[]> getPossibleMoves(bool isWhite)
+        {
+            List<int[]> list = new List<int[]>();
+            for(int i=0;i<nbCol;i++)
+            {
+                for(int j=0;j<nbLin;j++)
+                {
+                    if(matBoard[i,j]==-1)
+                    {
+                        if (IsPlayable(i, j, isWhite))
+                        {
+                            list.Add(new int[] { i,j});
+                        }
+                    }
+                }
+            }
+            return list;
+        }
+
         // privates methods
 
         private void initBoard()
