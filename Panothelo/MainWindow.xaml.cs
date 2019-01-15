@@ -25,6 +25,14 @@ namespace Panothelo
 
         ImageBrush blackPawn;
         ImageBrush whitePawn;
+
+        Player player1;
+        Player player2;
+
+        Board board;
+
+        int turnPlayer;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -39,6 +47,15 @@ namespace Panothelo
             blackPawn = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/Panothelo;component/PawnImage/BlackPawn.png")));
             whitePawn = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/Panothelo;component/PawnImage/WhitePawn.png")));
 
+            player1 = new Player("Jeremy", 1, whitePawn);
+            player2 = new Player("Julien", 2, blackPawn);
+
+            lblNamePlayer1.Content = player1.Name;
+            lblNamePlayer2.Content = player2.Name;
+
+            board = new Board(gridColumn, gridRow);
+
+            turnPlayer = 1;
         }
 
         private void InitializeBoard()
@@ -56,6 +73,15 @@ namespace Panothelo
                     lblGrid.MouseEnter += MouseEnterGrid;
                     lblGrid.MouseLeave += MouseLeaveGrid;
                     lblGrid.MouseLeftButtonUp += MouseButtonUpGrid;
+
+                    if(board.GetBoard()[i,j] == 0)
+                    {
+                        lblGrid.Background = player1.ImagePawn ;
+                    }
+                    else if(board.GetBoard()[i, j] == 1)
+                    {
+                        lblGrid.Background = player2.ImagePawn;
+                    }
 
                     Grid.SetRow(lblGrid, j);
                     Grid.SetColumn(lblGrid, i);
@@ -82,10 +108,24 @@ namespace Panothelo
 
             //MessageBox.Show(col.ToString() + " - " + row.ToString());
 
-            lblGrid.Background = whitePawn;
-
-
-
+            if (board.GetBoard()[col, row] == -1)
+            {
+                if (turnPlayer % 2 == 0)
+                {
+                    lblGrid.Background = player2.ImagePawn;
+                    board.GetBoard()[col, row] = 1;
+                    lblScorePlayer2.Content = board.GetBlackScore();
+                    player2.Score = board.GetBlackScore();
+                }
+                else
+                {
+                    lblGrid.Background = player1.ImagePawn;
+                    board.GetBoard()[col, row] = 0;
+                    lblScorePlayer1.Content = board.GetWhiteScore();
+                    player1.Score = board.GetWhiteScore();
+                }
+                turnPlayer++;
+            }
 
         }
 

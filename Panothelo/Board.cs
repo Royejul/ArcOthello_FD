@@ -26,7 +26,7 @@ namespace Panothelo
             int score = 0;
             for (int i=0; i<nbCol;i++)
             {
-                for(int j=0;i<nbLin;j++)
+                for(int j=0;j<nbLin;j++)
                 {
                     if (matBoard[i, j] == 1)
                         score++;
@@ -55,7 +55,7 @@ namespace Panothelo
             int score = 0;
             for (int i = 0; i < nbCol; i++)
             {
-                for (int j = 0; i < nbLin; j++)
+                for (int j = 0; j < nbLin; j++)
                 {
                     if (matBoard[i, j] == 0)
                         score++;
