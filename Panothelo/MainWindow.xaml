@@ -61,7 +61,7 @@
             <Label x:Name="lblScorePlayer1" Content="Score : 2" Width="200" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="20" Margin="0,55,0,78" Grid.RowSpan="2"/>
         </Grid>
 
-        <Grid x:Name="Board" Background="Green" Margin="0,0,30,23">
+        <Grid x:Name="GameBoard" Background="Green" Margin="0,0,30,23">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />

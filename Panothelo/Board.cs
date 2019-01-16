@@ -13,10 +13,18 @@ namespace Panothelo
         private int nbCol;
         private int nbLin;
 
+        private List<int[]> listTokenP1;
+        private List<int[]> listTokenP2;
+
+        List<int[]> listPossibleMoves;
+
         public Board(int col, int line)
         {
             this.nbCol = col;
             this.nbLin = line;
+            listTokenP1 = new List<int[]>();
+            listTokenP2 = new List<int[]>();
+            listPossibleMoves = new List<int[]>();
             matBoard = new int[col, line];
             initBoard();
         }
@@ -33,6 +41,7 @@ namespace Panothelo
                 }
             }
             return score;
+            //return listTokenP2.Count;
         }
 
         public int[,] GetBoard()
@@ -62,6 +71,7 @@ namespace Panothelo
                 }
             }
             return score;
+            //return listTokenP1.Count;
         }
 
         public bool IsPlayable(int column, int line, bool isWhite)
@@ -141,8 +151,8 @@ namespace Panothelo
 
         public List<int[]> getPossibleMoves(bool isWhite)
         {
-            List<int[]> list = new List<int[]>();
-            for(int i=0;i<nbCol;i++)
+            listPossibleMoves.Clear();
+            for (int i=0;i<nbCol;i++)
             {
                 for(int j=0;j<nbLin;j++)
                 {
@@ -150,12 +160,13 @@ namespace Panothelo
                     {
                         if (IsPlayable(i, j, isWhite))
                         {
-                            list.Add(new int[] { i,j});
+                            listPossibleMoves.Add(new int[] { i,j});
                         }
                     }
                 }
             }
-            return list;
+            listPossibleMoves.ForEach(el => Console.WriteLine(el[0] + ", " + el[1]));
+            return listPossibleMoves;
         }
 
         // privates methods
@@ -168,14 +179,24 @@ namespace Panothelo
             {
                 for(int j=0; j<nbLin;j++)
                 {
-                    if ((i==condI && j==condJ)||(i == condI+1 && j == condJ+1))
+                    if ((i == condI && j == condJ) || (i == condI + 1 && j == condJ + 1))
+                    {
                         matBoard[i, j] = 0;
-                    else if ((i == condI+1 && j == condJ) || (i == condI && j == condJ + 1))
+                        listTokenP1.Add(new int[] { i, j });
+                    }
+                    else if ((i == condI + 1 && j == condJ) || (i == condI && j == condJ + 1))
+                    {
                         matBoard[i, j] = 1;
+                        listTokenP2.Add(new int[]{ i, j});
+                    }
                     else
                         matBoard[i, j] = -1;
                 }
             }
+            listPossibleMoves.Add(new int[] { condI + 2, condJ });
+            listPossibleMoves.Add(new int[] { condI + 1, condJ - 1 });
+            listPossibleMoves.Add(new int[] { condI - 1, condJ + 1 });
+            listPossibleMoves.Add(new int[] { condI, condJ + 2 });
         }
 
         private void swapToken(int col, int line, int stepI, int stepJ, int stopTok)
@@ -199,6 +220,8 @@ namespace Panothelo
             }
             for (int i = column - 1; i > -1; i--)
             {
+                if (matBoard[i, line] == -1)
+                    return false;
                 if (matBoard[i, line] == tokenS && !okMove)
                 {
                     okMove = true;
@@ -218,8 +241,10 @@ namespace Panothelo
                 tokenS = 1;
                 tokenE = 0;
             }
-            for (int i = column + 1; i > nbCol; i++)
+            for (int i = column + 1; i < nbCol; i++)
             {
+                if (matBoard[i, line] == -1)
+                    return false;
                 if (matBoard[i, line] == tokenS && !okMove)
                 {
                     okMove = true;
@@ -241,6 +266,8 @@ namespace Panothelo
             }
             for (int j = line - 1; j > -1; j--)
             {
+                if (matBoard[column, j] == -1)
+                    return false;
                 if (matBoard[column, j] == tokenS && !okMove)
                 {
                     okMove = true;
@@ -260,8 +287,10 @@ namespace Panothelo
                 tokenS = 1;
                 tokenE = 0;
             }
-            for (int j = line + 1; j > nbLin; j++)
+            for (int j = line + 1; j < nbLin; j++)
             {
+                if (matBoard[column, j] == -1)
+                    return false;
                 if (matBoard[column, j] == tokenS && !okMove)
                 {
                     okMove = true;
@@ -281,17 +310,21 @@ namespace Panothelo
                 tokenS = 1;
                 tokenE = 0;
             }
-            for (int i = column - 1; i > -1; i--)
+            int it = 0;
+            if (line < column)
+                it = line;
+            else
+                it = column;
+            for (int s = 1; s < it; s++)
             {
-                for (int j = line - 1; j > -1; j--)
+                if (matBoard[column - s, line - s] == -1)
+                    return false;
+                if (matBoard[column - s, line - s] == tokenS && !okMove)
                 {
-                    if (matBoard[i, j] == tokenS && !okMove)
-                    {
-                        okMove = true;
-                    }
-                    else if (matBoard[i, j] == tokenE && okMove)
-                        return true;
+                    okMove = true;
                 }
+                else if (matBoard[column - s, line - s] == tokenE && okMove)
+                    return true;
             }
             return false;
         }
@@ -305,17 +338,21 @@ namespace Panothelo
                 tokenS = 1;
                 tokenE = 0;
             }
-            for (int i = column - 1; i > -1; i--)
+            int it = 0;
+            if (nbLin-1-line < column)
+                it = nbLin - 1 - line;
+            else
+                it = column;
+            for (int s = 1; s < it; s++)
             {
-                for (int j = line + 1; j > nbLin; j++)
+                if (matBoard[column - s, line + s] == -1)
+                    return false;
+                if (matBoard[column - s, line + s] == tokenS && !okMove)
                 {
-                    if (matBoard[i, j] == tokenS && !okMove)
-                    {
-                        okMove = true;
-                    }
-                    else if (matBoard[i, j] == tokenE && okMove)
-                        return true;
+                    okMove = true;
                 }
+                else if (matBoard[column - s, line + s] == tokenE && okMove)
+                    return true;
             }
             return false;
         }
@@ -329,18 +366,23 @@ namespace Panothelo
                 tokenS = 1;
                 tokenE = 0;
             }
-            for (int i = column + 1; i > nbCol; i++)
+            int it = 0;
+            if (line < nbCol- 1 - column)
+                it = line;
+            else
+                it = nbCol - 1 - column;
+            for (int s = 1; s < it; s++)
             {
-                for (int j = line - 1; j > -1; j--)
+                if (matBoard[column + s, line - s] == -1)
+                    return false;
+                if (matBoard[column + s, line - s] == tokenS && !okMove)
                 {
-                    if (matBoard[i, j] == tokenS && !okMove)
-                    {
-                        okMove = true;
-                    }
-                    else if (matBoard[i, j] == tokenE && okMove)
-                        return true;
+                    okMove = true;
                 }
+                else if (matBoard[column + s, line - s] == tokenE && okMove)
+                    return true;
             }
+            
             return false;
         }
         private bool checkDRB(int column, int line, bool isWhite)
@@ -353,17 +395,21 @@ namespace Panothelo
                 tokenS = 1;
                 tokenE = 0;
             }
-            for (int i = column + 1; i > nbCol; i++)
+            int it = 0;
+            if (nbLin - 1 - line < nbCol - 1 - column)
+                it = nbLin - 1 - line;
+            else
+                it = nbCol - 1 - column;
+            for (int s = 1; s < it; s++)
             {
-                for (int j = line + 1; j > nbLin; j++)
+                if (matBoard[column + s, line + s] == -1)
+                    return false;
+                if (matBoard[column + s, line + s] == tokenS && !okMove)
                 {
-                    if (matBoard[i, j] == tokenS && !okMove)
-                    {
-                        okMove = true;
-                    }
-                    else if (matBoard[i, j] == tokenE && okMove)
-                        return true;
+                    okMove = true;
                 }
+                else if (matBoard[column + s, line + s] == tokenE && okMove)
+                    return true;
             }
             return false;
         }

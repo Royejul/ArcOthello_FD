@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -29,17 +30,29 @@ namespace Panothelo
         Player player1;
         Player player2;
 
+        List<int[]> listPossibility;
+
         Board board;
 
-        int turnPlayer;
+        bool turnPlayer1;
 
         public MainWindow()
         {
             InitializeComponent();
             InitializeGame();
             InitializeBoard();
+            update();
 
+        }
 
+        private void update()
+        {
+            listPossibility = board.getPossibleMoves(turnPlayer1);
+            //listPossibility.ForEach(el => Console.WriteLine(el[0] +", "+el[1]));
+            /*foreach (int[] pos in listPossibility)
+            {
+                //
+            }*/
         }
 
         private void InitializeGame()
@@ -55,7 +68,7 @@ namespace Panothelo
 
             board = new Board(gridColumn, gridRow);
 
-            turnPlayer = 1;
+            turnPlayer1 = true;
         }
 
         private void InitializeBoard()
@@ -85,7 +98,7 @@ namespace Panothelo
 
                     Grid.SetRow(lblGrid, j);
                     Grid.SetColumn(lblGrid, i);
-                    Board.Children.Add(lblGrid);
+                    GameBoard.Children.Add(lblGrid);
                 }
             }
         }
@@ -110,21 +123,23 @@ namespace Panothelo
 
             if (board.GetBoard()[col, row] == -1)
             {
-                if (turnPlayer % 2 == 0)
-                {
-                    lblGrid.Background = player2.ImagePawn;
-                    board.GetBoard()[col, row] = 1;
-                    lblScorePlayer2.Content = board.GetBlackScore();
-                    player2.Score = board.GetBlackScore();
-                }
-                else
+                if (turnPlayer1)
                 {
                     lblGrid.Background = player1.ImagePawn;
                     board.GetBoard()[col, row] = 0;
                     lblScorePlayer1.Content = board.GetWhiteScore();
                     player1.Score = board.GetWhiteScore();
+                    turnPlayer1 = false;
                 }
-                turnPlayer++;
+                else
+                {
+                    lblGrid.Background = player2.ImagePawn;
+                    board.GetBoard()[col, row] = 1;
+                    lblScorePlayer2.Content = board.GetBlackScore();
+                    player2.Score = board.GetBlackScore();
+                    turnPlayer1 = true;
+                }
+                update();
             }
 
         }
