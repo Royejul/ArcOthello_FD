@@ -169,6 +169,20 @@ namespace Panothelo
             return listPossibleMoves;
         }
 
+        public bool checkBoardFull()
+        {
+            for(int i=0;i<nbCol;i++)
+            {
+                for(int j=0; j<nbLin;j++)
+                {
+                    if (matBoard[i, j] == -1)
+                        return false;
+                }
+            }
+            return true;
+        }
+
+
         // privates methods
 
         private void initBoard()
