@@ -10,6 +10,7 @@ using System.Timers;
 using System.Windows.Threading;
 using System.ComponentModel;
 using System.Xml;
+using System.Threading.Tasks;
 
 namespace Panothelo
 {
@@ -30,6 +31,12 @@ namespace Panothelo
         Player player2;
 
         Board board;
+
+        DispatcherTimer timerPlayer1;
+        DispatcherTimer timerPlayer2;
+
+        Stopwatch swPlayer1;
+        Stopwatch swPlayer2;
 
         int turnPlayer;
 
@@ -55,7 +62,12 @@ namespace Panothelo
 
             board = new Board(gridColumn, gridRow);
 
+            TimerInitialize();
+
             turnPlayer = 1;
+
+
+
         }
 
         private void InitializeBoard()
@@ -86,9 +98,14 @@ namespace Panothelo
                     Grid.SetRow(lblGrid, j);
                     Grid.SetColumn(lblGrid, i);
                     Board.Children.Add(lblGrid);
+
+                    
                 }
             }
+
+            swPlayer1.Start();
         }
+
 
         private void MouseEnterGrid(object sender, System.Windows.Input.MouseEventArgs e)
         {
@@ -110,25 +127,58 @@ namespace Panothelo
 
             if (board.GetBoard()[col, row] == -1)
             {
+                
                 if (turnPlayer % 2 == 0)
                 {
                     lblGrid.Background = player2.ImagePawn;
                     board.GetBoard()[col, row] = 1;
-                    lblScorePlayer2.Content = board.GetBlackScore();
+                    lblScorePlayer2.Content = "Score : " + board.GetBlackScore();
                     player2.Score = board.GetBlackScore();
+
+                    swPlayer2.Stop();
+                    swPlayer1.Start();
+
                 }
                 else
                 {
                     lblGrid.Background = player1.ImagePawn;
                     board.GetBoard()[col, row] = 0;
-                    lblScorePlayer1.Content = board.GetWhiteScore();
+                    lblScorePlayer1.Content = "Score : " + board.GetWhiteScore();
                     player1.Score = board.GetWhiteScore();
+
+                    swPlayer1.Stop();
+                    swPlayer2.Start();
                 }
                 turnPlayer++;
             }
-
         }
 
-    }
+        private void TimerInitialize()
+        {
+            timerPlayer1 = new DispatcherTimer();
+            timerPlayer1.Tick += new EventHandler(TimerTick);
+            timerPlayer1.Interval = new TimeSpan(0, 0, 0, 0, 1);
+            timerPlayer1.Start();
 
+            timerPlayer2 = new DispatcherTimer();
+            timerPlayer2.Tick += new EventHandler(TimerTick);
+            timerPlayer2.Interval = new TimeSpan(0, 0, 0, 0, 1);
+            timerPlayer2.Start();
+
+            swPlayer1 = new Stopwatch();
+            swPlayer2 = new Stopwatch();
+        }
+
+        private void TimerTick(object sender, EventArgs e)
+        {
+            if(sender == timerPlayer1)
+            {
+                lblTimerPlayer1.Content = String.Format("{0:00}:{1:00}", swPlayer1.Elapsed.Minutes, swPlayer1.Elapsed.Seconds);
+            }
+            else
+            {
+                lblTimerPlayer2.Content = String.Format("{0:00}:{1:00}", swPlayer2.Elapsed.Minutes, swPlayer2.Elapsed.Seconds);
+            }
+        }
+    }
 }
