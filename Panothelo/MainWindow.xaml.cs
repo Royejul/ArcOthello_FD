@@ -20,7 +20,7 @@ namespace Panothelo
     /// </summary>
     public partial class MainWindow : Window
     {
-        
+
 
         int gridColumn = 9;
         int gridRow = 7;
@@ -44,7 +44,7 @@ namespace Panothelo
         Stopwatch swPlayer1;
         Stopwatch swPlayer2;
 
-        
+
 
         public MainWindow()
         {
@@ -62,23 +62,33 @@ namespace Panothelo
             foreach (int pos in listLastPossible)
             {
                 lblUpdate = GameBoard.Children[pos] as Label;
-                lblUpdate.Background = Brushes.Transparent;
-
             }
-            listPossibility = board.getPossibleMoves(turnPlayer1);
+            listLastPossible.Clear();
+
+            foreach (int i in board.getPossibleMoves(turnPlayer1))
+            {
+                listPossibility.Add(i);
+            }
+
             foreach (int pos in listPossibility)
             {
                 int posCell = pos;
                 listLastPossible.Add(posCell);
 
                 lblUpdate = GameBoard.Children[posCell] as Label;
-                lblUpdate.Background = Brushes.Blue;
-                
+                lblUpdate.Background = Brushes.LightGray;
+
             }
 
             listPossibility.Clear();
+
+            if (listLastPossible.Count == 0)
+            {
+                turnPlayer1 = !turnPlayer1;
+                //update();
+            }
         }
-    
+
         private void InitializeGame()
         {
             blackPawn = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/Panothelo;component/PawnImage/Stump.png")));
@@ -92,16 +102,23 @@ namespace Panothelo
             lblNamePlayer1.Background = Brushes.Green;
 
             lblNamePlayer2.Content = player2.Name;
+            lblNamePlayer2.Background = Brushes.White;
 
             lblScorePlayer1.Content = "Score : " + 2;
             lblScorePlayer2.Content = "Score : " + 2;
 
+            listPossibility = new List<int>();
             listLastPossible = new List<int>();
 
             board = new Board(gridColumn, gridRow);
 
             turnPlayer1 = true;
             TimerInitialize();
+        }
+
+        private void InitializeGameFromLoad()
+        {
+
         }
 
         private void InitializeBoard()
@@ -116,15 +133,15 @@ namespace Panothelo
                         BorderThickness = new Thickness(2)
                     };
 
-                    //lblGrid.MouseEnter += MouseEnterGrid;
-                    //lblGrid.MouseLeave += MouseLeaveGrid;
-                    lblGrid.MouseLeftButtonUp += MouseButtonUpGrid;
+                    lblGrid.MouseEnter += MouseEnterGrid;
+                    lblGrid.MouseLeave += MouseLeaveGrid;
+                    lblGrid.MouseLeftButtonDown += MouseButtonDownGrid;
 
-                    if(board.GetBoard()[i,j] == 0)
+                    if (board.GetBoard()[i, j] == 0)
                     {
-                        lblGrid.Background = player1.ImagePawn ;
+                        lblGrid.Background = player1.ImagePawn;
                     }
-                    else if(board.GetBoard()[i, j] == 1)
+                    else if (board.GetBoard()[i, j] == 1)
                     {
                         lblGrid.Background = player2.ImagePawn;
                     }
@@ -137,24 +154,20 @@ namespace Panothelo
             swPlayer1.Start();
         }
 
-
         private void MouseEnterGrid(object sender, System.Windows.Input.MouseEventArgs e)
         {
             Label lblGrid = sender as Label;
             int col = Grid.GetColumn(lblGrid);
             int row = Grid.GetRow(lblGrid);
+            int posClick = col * gridRow + row;
 
-            //listPossibility = board.getPossibleMoves(turnPlayer1);
-            foreach (int pos in listPossibility)
+            if (listLastPossible.Contains(posClick))
             {
-                //if(board.GetBoard()[pos] == -1)
+                if (turnPlayer1)
                     lblGrid.Background = player1.ImagePawn;
-                
+                else
+                    lblGrid.Background = player2.ImagePawn;
             }
-
-
-
-
         }
 
         private void MouseLeaveGrid(object sender, System.Windows.Input.MouseEventArgs e)
@@ -162,14 +175,15 @@ namespace Panothelo
             Label lblGrid = sender as Label;
             int col = Grid.GetColumn(lblGrid);
             int row = Grid.GetRow(lblGrid);
+            int posClick = col * gridRow + row;
 
-            if (board.GetBoard()[col, row] == -1)
+            if (listLastPossible.Contains(posClick))
             {
-                lblGrid.Background = Brushes.Transparent;
+                update();
             }
         }
 
-        private void MouseButtonUpGrid(object sender, System.Windows.Input.MouseEventArgs e)
+        private void MouseButtonDownGrid(object sender, System.Windows.Input.MouseEventArgs e)
         {
             Label lblGrid = sender as Label;
 
@@ -179,30 +193,34 @@ namespace Panothelo
 
             if (listLastPossible.Contains(posClick))
             {
+                board.PlayMove(col, row, turnPlayer1);
+                GameBoard.Children.Clear();
+                InitializeBoard();
+
                 listLastPossible.Remove(posClick);
+
                 if (PlayerTurn())
                 {
                     lblGrid.Background = player2.ImagePawn;
                     board.GetBoard()[col, row] = 1;
-                    lblScorePlayer2.Content = "Score : " + board.GetBlackScore();
-                    player2.Score = board.GetBlackScore();
-                    turnPlayer1 = true; 
+                    turnPlayer1 = true;
                 }
                 else
                 {
                     lblGrid.Background = player1.ImagePawn;
                     board.GetBoard()[col, row] = 0;
-                    lblScorePlayer1.Content = "Score : " + board.GetWhiteScore();
-                    player1.Score = board.GetWhiteScore();
                     turnPlayer1 = false;
                 }
+
+                lblScorePlayer1.Content = "Score : " + board.GetWhiteScore();
+                lblScorePlayer2.Content = "Score : " + board.GetBlackScore();
                 update();
             }
         }
 
         private bool PlayerTurn()
         {
-            if(!turnPlayer1)
+            if (!turnPlayer1)
             {
                 lblNamePlayer1.Background = Brushes.Green;
                 lblNamePlayer2.Background = Brushes.White;
@@ -244,7 +262,7 @@ namespace Panothelo
 
         private void TimerTick(object sender, EventArgs e)
         {
-            if(sender == timerPlayer1)
+            if (sender == timerPlayer1)
             {
                 lblTimerPlayer1.Content = String.Format("{0:00}:{1:00}", swPlayer1.Elapsed.Minutes, swPlayer1.Elapsed.Seconds);
             }
@@ -261,7 +279,7 @@ namespace Panothelo
 
         private void MenuAbout_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("About : Feuillade Julien and Dubois Jeremy.\n Othello C# 2018-2019.\n HE-ARC");
+            MessageBox.Show("Othello C# - HE-ARC \nAuteur : Feuillade Julien et Dubois Jeremy");
         }
 
         private void MenuNew_Click(object sender, RoutedEventArgs e)
@@ -272,21 +290,18 @@ namespace Panothelo
             update();
         }
 
-        /// <summary>
-        /// Save method who writes all parameter to an extern XML file
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void MenuSave_Click(object sender, RoutedEventArgs e)
         {
-           // if(turnPlayer % 2 == 0)
-                
+            if (turnPlayer1)
+                swPlayer1.Stop();
+            else
+                swPlayer2.Stop();
 
             string filename = "", strBoard = "";
 
             System.Windows.Forms.SaveFileDialog saveFileDialog = new System.Windows.Forms.SaveFileDialog
             {
-                Title = "Save the game",
+                Title = "Save the Othello",
                 DefaultExt = "xml",
                 CheckPathExists = true,
                 Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*"
@@ -295,8 +310,7 @@ namespace Panothelo
             if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 filename = saveFileDialog.FileName;
-
-                strBoard = board.GetBoard().ToString();
+                strBoard = board.ToString();
 
                 XmlWriterSettings settings = new XmlWriterSettings
                 {
@@ -309,28 +323,23 @@ namespace Panothelo
                 {
                     using (XmlWriter writer = XmlWriter.Create(filename, settings))
                     {
-
                         writer.WriteProcessingInstruction("xml", "version='1.0' encoding='UTF-8'");
 
                         writer.WriteStartElement("OthelloGame");
 
+                        writer.WriteElementString("Turn", turnPlayer1.ToString());
+
+                        writer.WriteElementString("Board", strBoard);
+
                         writer.WriteStartElement("Player1");
                         writer.WriteElementString("Name", player1.Name);
                         writer.WriteElementString("Time", swPlayer1.Elapsed.ToString("mm\\:ss\\:ff"));
-                        writer.WriteElementString("Score", player1.Score.ToString());
                         writer.WriteEndElement();
-
 
                         writer.WriteStartElement("Player2");
                         writer.WriteElementString("Name", player2.Name);
                         writer.WriteElementString("Time", swPlayer2.Elapsed.ToString("mm\\:ss\\:ff"));
-                        writer.WriteElementString("Score", player2.Score.ToString());
                         writer.WriteEndElement();
-
-                        writer.WriteElementString("Turn", turnPlayer1.ToString());
-
-
-                        writer.WriteElementString("Board", strBoard);
 
                         writer.WriteEndElement();
                         writer.WriteEndDocument();
@@ -338,6 +347,10 @@ namespace Panothelo
                         writer.Flush();
                         writer.Close();
 
+                        if (turnPlayer1)
+                            swPlayer1.Start();
+                        else
+                            swPlayer2.Start();
                     }
                 }
                 catch (ArgumentException)
@@ -346,8 +359,13 @@ namespace Panothelo
                 }
 
             }
-
-
+            else
+            {
+                if (turnPlayer1)
+                    swPlayer1.Start();
+                else
+                    swPlayer2.Start();
+            }
         }
 
         /// <summary>
@@ -357,7 +375,103 @@ namespace Panothelo
         /// <param name="e"></param>
         private void MenuLoad_Click(object sender, RoutedEventArgs e)
         {
-           
+            if (turnPlayer1)
+                swPlayer1.Stop();
+            else
+                swPlayer2.Stop();
+
+            string strBoard = "";
+            string[] strTabBoard;
+
+
+            System.Windows.Forms.OpenFileDialog ofd = new System.Windows.Forms.OpenFileDialog
+            {
+                Filter = "XML Files (*.xml)|*.xml",
+                FilterIndex = 0,
+                DefaultExt = "xml"
+            };
+
+
+            if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                if (!String.Equals(Path.GetExtension(ofd.FileName),
+                                   ".xml",
+                                   StringComparison.OrdinalIgnoreCase))
+                {
+                    // Invalid file type selected; display an error.
+                    MessageBox.Show("You must select an XML file.",
+                                    "Invalid File Type",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Error);
+
+                }
+                else
+                {
+                    XmlReaderSettings settings = new XmlReaderSettings
+                    {
+                        Async = true
+                    };
+
+                    using (XmlReader reader = XmlReader.Create(ofd.FileName, settings))
+                    {
+                        try
+                        {
+                            while (reader.Read())
+                            {
+                                if (reader.IsStartElement())
+                                {
+                                    switch (reader.Name)
+                                    {
+
+
+                                        case "Board":
+                                            if (reader.Read())
+                                            {
+                                                strBoard = reader.Value.Trim();
+                                            }
+                                            break;
+
+                                        case "Turn":
+                                            if (reader.Read())
+                                                turnPlayer1 = Boolean.Parse(reader.Value.Trim());
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                        catch (XmlException)
+                        {
+                            MessageBox.Show("Error while reading XML file, please chose another one");
+                        }
+
+                        try
+                        {
+
+                            strTabBoard = strBoard.Split(',');
+                            Console.Write(strTabBoard);
+                            int k = 0;
+                            for (int i = 0; i < gridColumn; i++)
+                            {
+                                for (int j = 0; j < gridRow; j++)
+                                {
+                                    board.GetBoard()[i, j] = int.Parse(strTabBoard[k]);
+                                    
+                                    k++;
+                                }
+                            }
+                            GameBoard.Children.Clear();
+                            InitializeBoard();
+                            update();
+
+                        }
+                        catch (NullReferenceException)
+                        {
+                            Debug.WriteLine("NullReference Exception");
+                        }
+                    }
+                }
+            }
+
         }
     }
 }

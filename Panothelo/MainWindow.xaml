@@ -8,7 +8,7 @@
         Title="MainWindow" Height="657" Width="1084" MinWidth="800" MinHeight="700" WindowStartupLocation="CenterScreen" >
     <DockPanel LastChildFill="True" Margin="0" Grid.RowSpan="3">
 
-        <Menu DockPanel.Dock="Top" Background="#FFB3D3B3" FontSize="15px">
+        <Menu DockPanel.Dock="Top" Background="White" FontSize="15px">
             <MenuItem Header="_File" FontWeight="Bold" Height="30">
                 <MenuItem Header="_New" Click="MenuNew_Click"/>
                 <MenuItem Header="_Save" Click="MenuSave_Click"/>

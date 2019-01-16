@@ -123,7 +123,7 @@ namespace Panothelo
             }
             if (checkDLT(column, line, isWhite))
             {
-                swapToken(column + 1, line - 1, -1, -1, tok);
+                swapToken(column - 1, line - 1, -1, -1, tok);
                 allOK = true;
             }
             if (checkDLB(column, line, isWhite))
@@ -138,7 +138,7 @@ namespace Panothelo
             }
             if (checkDRB(column, line, isWhite))
             {
-                swapToken(column + 1, line + 1, -1, 1, tok);
+                swapToken(column + 1, line + 1, 1, 1, tok);
                 allOK = true;
             }
             if(allOK)
@@ -199,6 +199,7 @@ namespace Panothelo
         {
             if (stopTok != matBoard[col, line])
             {
+                Console.WriteLine(col + " : " + line);
                 matBoard[col, line] = stopTok;
                 swapToken(col + stepI, line + stepJ, stepI, stepJ, stopTok);
             }
@@ -408,6 +409,21 @@ namespace Panothelo
                     return true;
             }
             return false;
+        }
+
+        public override string ToString()
+        {
+            string strBoard = "";
+            //Put the board into a string
+            for (int i = 0; i < nbCol; i++)
+            {
+                for (int j = 0; j < nbLin; j++)
+                {
+                    strBoard += matBoard[i, j] + ",";
+                }
+            };
+
+            return strBoard;
         }
     }
 }
