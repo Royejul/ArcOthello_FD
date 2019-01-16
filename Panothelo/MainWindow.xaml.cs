@@ -31,7 +31,8 @@ namespace Panothelo
         Player player1;
         Player player2;
 
-        List<int[]> listPossibility;
+        List<int> listPossibility;
+        List<int> listLastPossible;
 
         Board board;
 
@@ -56,14 +57,28 @@ namespace Panothelo
 
         private void update()
         {
-            listPossibility = board.getPossibleMoves(turnPlayer1);
-            //listPossibility.ForEach(el => Console.WriteLine(el[0] +", "+el[1]));
-            /*foreach (int[] pos in listPossibility)
-            {
-                //
-            }*/
-        }
+            Label lblUpdate;
 
+            foreach (int pos in listLastPossible)
+            {
+                lblUpdate = GameBoard.Children[pos] as Label;
+                lblUpdate.Background = Brushes.Transparent;
+
+            }
+            listPossibility = board.getPossibleMoves(turnPlayer1);
+            foreach (int pos in listPossibility)
+            {
+                int posCell = pos;
+                listLastPossible.Add(posCell);
+
+                lblUpdate = GameBoard.Children[posCell] as Label;
+                lblUpdate.Background = Brushes.Blue;
+                
+            }
+
+            listPossibility.Clear();
+        }
+    
         private void InitializeGame()
         {
             blackPawn = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/Panothelo;component/PawnImage/Stump.png")));
@@ -81,6 +96,7 @@ namespace Panothelo
             lblScorePlayer1.Content = "Score : " + 2;
             lblScorePlayer2.Content = "Score : " + 2;
 
+            listLastPossible = new List<int>();
 
             board = new Board(gridColumn, gridRow);
 
@@ -100,8 +116,8 @@ namespace Panothelo
                         BorderThickness = new Thickness(2)
                     };
 
-                    lblGrid.MouseEnter += MouseEnterGrid;
-                    lblGrid.MouseLeave += MouseLeaveGrid;
+                    //lblGrid.MouseEnter += MouseEnterGrid;
+                    //lblGrid.MouseLeave += MouseLeaveGrid;
                     lblGrid.MouseLeftButtonUp += MouseButtonUpGrid;
 
                     if(board.GetBoard()[i,j] == 0)
@@ -125,11 +141,32 @@ namespace Panothelo
         private void MouseEnterGrid(object sender, System.Windows.Input.MouseEventArgs e)
         {
             Label lblGrid = sender as Label;
+            int col = Grid.GetColumn(lblGrid);
+            int row = Grid.GetRow(lblGrid);
+
+            //listPossibility = board.getPossibleMoves(turnPlayer1);
+            foreach (int pos in listPossibility)
+            {
+                //if(board.GetBoard()[pos] == -1)
+                    lblGrid.Background = player1.ImagePawn;
+                
+            }
+
+
+
+
         }
 
         private void MouseLeaveGrid(object sender, System.Windows.Input.MouseEventArgs e)
         {
             Label lblGrid = sender as Label;
+            int col = Grid.GetColumn(lblGrid);
+            int row = Grid.GetRow(lblGrid);
+
+            if (board.GetBoard()[col, row] == -1)
+            {
+                lblGrid.Background = Brushes.Transparent;
+            }
         }
 
         private void MouseButtonUpGrid(object sender, System.Windows.Input.MouseEventArgs e)
@@ -138,14 +175,16 @@ namespace Panothelo
 
             int col = Grid.GetColumn(lblGrid);
             int row = Grid.GetRow(lblGrid);
+            int posClick = col * gridRow + row;
 
-            if (board.GetBoard()[col, row] == -1)
+            if (listLastPossible.Contains(posClick))
             {
+                listLastPossible.Remove(posClick);
                 if (PlayerTurn())
                 {
                     lblGrid.Background = player2.ImagePawn;
                     board.GetBoard()[col, row] = 1;
-                    lblScorePlayer2.Content = board.GetBlackScore();
+                    lblScorePlayer2.Content = "Score : " + board.GetBlackScore();
                     player2.Score = board.GetBlackScore();
                     turnPlayer1 = true; 
                 }
@@ -230,6 +269,7 @@ namespace Panothelo
             GameBoard.Children.Clear();
             InitializeGame();
             InitializeBoard();
+            update();
         }
 
         /// <summary>

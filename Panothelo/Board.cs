@@ -16,7 +16,7 @@ namespace Panothelo
         private List<int[]> listTokenP1;
         private List<int[]> listTokenP2;
 
-        List<int[]> listPossibleMoves;
+        List<int> listPossibleMoves;
 
         public Board(int col, int line)
         {
@@ -24,7 +24,7 @@ namespace Panothelo
             this.nbLin = line;
             listTokenP1 = new List<int[]>();
             listTokenP2 = new List<int[]>();
-            listPossibleMoves = new List<int[]>();
+            listPossibleMoves = new List<int>();
             matBoard = new int[col, line];
             initBoard();
         }
@@ -149,7 +149,7 @@ namespace Panothelo
             return allOK;
         }
 
-        public List<int[]> getPossibleMoves(bool isWhite)
+        public List<int> getPossibleMoves(bool isWhite)
         {
             listPossibleMoves.Clear();
             for (int i=0;i<nbCol;i++)
@@ -160,7 +160,7 @@ namespace Panothelo
                     {
                         if (IsPlayable(i, j, isWhite))
                         {
-                            listPossibleMoves.Add(new int[] { i,j});
+                            listPossibleMoves.Add(i * nbLin + j);
                         }
                     }
                 }
