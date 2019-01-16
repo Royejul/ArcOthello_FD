@@ -110,6 +110,15 @@
     <Resource Include="PawnImage\BlackPawn.png" />
     <Resource Include="PawnImage\WhitePawn.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="PawnImage\Stump.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="PawnImage\Leaf.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="PawnImage\Romain.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -165,7 +165,7 @@ namespace Panothelo
                     }
                 }
             }
-            listPossibleMoves.ForEach(el => Console.WriteLine(el[0] + ", " + el[1]));
+            //listPossibleMoves.ForEach(el => Console.WriteLine(el[0] + ", " + el[1]));
             return listPossibleMoves;
         }
 
@@ -193,10 +193,6 @@ namespace Panothelo
                         matBoard[i, j] = -1;
                 }
             }
-            listPossibleMoves.Add(new int[] { condI + 2, condJ });
-            listPossibleMoves.Add(new int[] { condI + 1, condJ - 1 });
-            listPossibleMoves.Add(new int[] { condI - 1, condJ + 1 });
-            listPossibleMoves.Add(new int[] { condI, condJ + 2 });
         }
 
         private void swapToken(int col, int line, int stepI, int stepJ, int stopTok)

@@ -7,6 +7,19 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="657" Width="1084" MinWidth="800" MinHeight="700" WindowStartupLocation="CenterScreen" >
     <DockPanel LastChildFill="True" Margin="0" Grid.RowSpan="3">
+
+        <Menu DockPanel.Dock="Top" Background="#FFB3D3B3" FontSize="15px">
+            <MenuItem Header="_File" FontWeight="Bold" Height="30">
+                <MenuItem Header="_New" Click="MenuNew_Click"/>
+                <MenuItem Header="_Save" Click="MenuSave_Click"/>
+                <MenuItem Header="_Load" Click="MenuLoad_Click"/>
+                <Separator />
+                <MenuItem Header="_Exit" Click="MenuQuit_Click"/>
+            </MenuItem>
+            <MenuItem Header="Edit" FontWeight="Bold">
+                <MenuItem Header="_About" Click="MenuAbout_Click"/>
+            </MenuItem>
+        </Menu>
         <Grid Height="50"  DockPanel.Dock="Top" Margin="250,0,30,0" VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -54,11 +67,11 @@
             <Label Grid.Row="6" Grid.Column="1" Content="7" FontSize="36" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Width="33"/>
             <Label x:Name="lblNamePlayer1" Content="Player 1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="24" FontWeight="Bold" Margin="0,0,0,30"/>
             <Label x:Name="lblNamePlayer2" Content="Player 2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="24" FontWeight="Bold" Grid.Row="2" Margin="0,0,0,30"/>
-            <Label x:Name="lblTimerPlayer1" Content="00:00" Width="200" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="20" Grid.Row="1" Margin="0,7,0,41" Height="37"/>
+            <Label x:Name="lblTimerPlayer1" Content="00:00" Width="200" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="20" Grid.Row="1" Margin="0,14.5,0,29" Height="37"/>
             <Label x:Name="lblTimerPlayer2" Content="00:00" Grid.Row="3" Height="37" Width="200" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="20" Margin="0,7,0,41"/>
-            <Image HorizontalAlignment="Left" Height="244" Grid.Row="4" Grid.RowSpan="3" VerticalAlignment="Top" Width="165" Source="PawnImage/Panoramix.png" Margin="25,0,0,0"/>
             <Label x:Name="lblScorePlayer2" Content="Score : 2" Grid.Row="2" Width="200" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="20" Margin="0,55,0,78" Grid.RowSpan="2" Height="37"/>
-            <Label x:Name="lblScorePlayer1" Content="Score : 2" Width="200" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="20" Margin="0,55,0,78" Grid.RowSpan="2"/>
+            <Label x:Name="lblScorePlayer1" Content="Score : 2" Width="200" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="20" Margin="0,58,0,67" Grid.RowSpan="2"/>
+            <Label x:Name="lblPlayerImage" Content="" HorizontalAlignment="Left" Margin="10,0,0,0" Grid.Row="4" VerticalAlignment="Top" Height="256" Width="180" Grid.RowSpan="3"/>
         </Grid>
 
         <Grid x:Name="GameBoard" Background="Green" Margin="0,0,30,23">
