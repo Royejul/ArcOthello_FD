@@ -11,17 +11,12 @@ namespace Panothelo
     public class Player
     {
         public String Name { get; }
-        public int ID { get; }
         public ImageBrush ImagePawn { get; set; }
-        public int Score { get; set; }
 
-        public Player(String name, int id, ImageBrush image)
+        public Player(String name, ImageBrush image)
         {
             this.Name = name;
-            this.ID = id;
             this.ImagePawn = image;
-            Score = 2;
-
         }
 
         public override string ToString()

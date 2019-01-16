@@ -44,6 +44,8 @@ namespace Panothelo
         Stopwatch swPlayer1;
         Stopwatch swPlayer2;
 
+        int[] timerAddPlayer1;
+        int[] timerAddPlayer2;
 
 
         public MainWindow()
@@ -128,8 +130,8 @@ namespace Panothelo
             whitePawn = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/Panothelo;component/PawnImage/Leaf.png")));
             lblPlayerImage.Background = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/Panothelo;component/PawnImage/Panoramix.png")));
 
-            player1 = new Player("Jeremy", 1, whitePawn);
-            player2 = new Player("Julien", 2, blackPawn);
+            player1 = new Player("Jeremy", whitePawn);
+            player2 = new Player("Julien", blackPawn);
 
             lblNamePlayer1.Content = player1.Name;
             lblNamePlayer1.Background = Brushes.Green;
@@ -137,21 +139,49 @@ namespace Panothelo
             lblNamePlayer2.Content = player2.Name;
             lblNamePlayer2.Background = Brushes.White;
 
-            lblScorePlayer1.Content = "Score : " + 2;
-            lblScorePlayer2.Content = "Score : " + 2;
-
             listLastPossible = new List<int>();
 
             board = new Board(gridColumn, gridRow);
+
+            lblScorePlayer1.Content = "Score : " + board.GetWhiteScore();
+            lblScorePlayer2.Content = "Score : " + board.GetBlackScore();
+
+            timerAddPlayer1 = new int[2];
+            timerAddPlayer2 = new int[2];
+
+            timerAddPlayer1[0] = 0;
+            timerAddPlayer1[1] = 0;
+            timerAddPlayer2[0] = 0;
+            timerAddPlayer2[1] = 0;
 
             turnPlayer1 = true;
             nbPass = 0;
             TimerInitialize();
         }
 
-        private void InitializeGameFromLoad()
+        private void InitializeGameFromLoad(String namePlayer1, String namePlayer2)
         {
+            player1 = new Player(namePlayer1, whitePawn);
+            player2 = new Player(namePlayer2, blackPawn);
 
+            lblNamePlayer1.Content = player1.Name;
+            lblNamePlayer2.Content = player2.Name;
+            if(turnPlayer1)
+            {
+                lblNamePlayer1.Background = Brushes.Green;
+                lblNamePlayer2.Background = Brushes.White;
+                lblPlayerImage.Background = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/Panothelo;component/PawnImage/Panoramix.png")));
+            }
+            else{
+                lblNamePlayer2.Background = Brushes.Green;
+                lblNamePlayer1.Background = Brushes.White;
+                lblPlayerImage.Background = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/Panothelo;component/PawnImage/Romain.png")));
+            }
+
+            lblScorePlayer1.Content = "Score : " + board.GetWhiteScore();
+            lblScorePlayer2.Content = "Score : " + board.GetBlackScore();
+
+            TimerInitialize();
         }
 
         private void InitializeBoard()
@@ -184,7 +214,10 @@ namespace Panothelo
                     GameBoard.Children.Add(lblGrid);
                 }
             }
-            swPlayer1.Start();
+            if (turnPlayer1)
+                swPlayer1.Start();
+            else
+                swPlayer2.Start();
         }
 
         private void MouseEnterGrid(object sender, System.Windows.Input.MouseEventArgs e)
@@ -297,11 +330,11 @@ namespace Panothelo
         {
             if (sender == timerPlayer1)
             {
-                lblTimerPlayer1.Content = String.Format("{0:00}:{1:00}", swPlayer1.Elapsed.Minutes, swPlayer1.Elapsed.Seconds);
+                lblTimerPlayer1.Content = String.Format("{0:00}:{1:00}", swPlayer1.Elapsed.Minutes + timerAddPlayer1[0], swPlayer1.Elapsed.Seconds + timerAddPlayer1[1]);
             }
             else
             {
-                lblTimerPlayer2.Content = String.Format("{0:00}:{1:00}", swPlayer2.Elapsed.Minutes, swPlayer2.Elapsed.Seconds);
+                lblTimerPlayer2.Content = String.Format("{0:00}:{1:00}", swPlayer2.Elapsed.Minutes + timerAddPlayer2[0], swPlayer2.Elapsed.Seconds + timerAddPlayer2[1]);
             }
         }
 
@@ -364,15 +397,11 @@ namespace Panothelo
 
                         writer.WriteElementString("Board", strBoard);
 
-                        writer.WriteStartElement("Player1");
-                        writer.WriteElementString("Name", player1.Name);
-                        writer.WriteElementString("Time", swPlayer1.Elapsed.ToString("mm\\:ss\\:ff"));
-                        writer.WriteEndElement();
+                        writer.WriteElementString("NamePlayer1", player1.Name);
+                        writer.WriteElementString("TimePlayer1", swPlayer1.Elapsed.ToString("mm\\:ss"));
 
-                        writer.WriteStartElement("Player2");
-                        writer.WriteElementString("Name", player2.Name);
-                        writer.WriteElementString("Time", swPlayer2.Elapsed.ToString("mm\\:ss\\:ff"));
-                        writer.WriteEndElement();
+                        writer.WriteElementString("NamePlayer2", player2.Name);
+                        writer.WriteElementString("TimePlayer2", swPlayer2.Elapsed.ToString("mm\\:ss"));
 
                         writer.WriteEndElement();
                         writer.WriteEndDocument();
@@ -416,6 +445,12 @@ namespace Panothelo
             string strBoard = "";
             string[] strTabBoard;
 
+            string namePlayer1 = "";
+            string namePlayer2 = "";
+
+            string timePlayer1 = "";
+            string timePlayer2 = "";
+
 
             System.Windows.Forms.OpenFileDialog ofd = new System.Windows.Forms.OpenFileDialog
             {
@@ -455,7 +490,33 @@ namespace Panothelo
                                 {
                                     switch (reader.Name)
                                     {
+                                        case "NamePlayer1":
+                                            if (reader.Read())
+                                            {
+                                                namePlayer1 = reader.Value.Trim();
+                                            }
+                                            break;
 
+                                        case "NamePlayer2":
+                                            if (reader.Read())
+                                            {
+                                                namePlayer2 = reader.Value.Trim();
+                                            }
+                                            break;
+
+                                        case "TimePlayer1":
+                                            if (reader.Read())
+                                            {
+                                                timePlayer1 = reader.Value.Trim();
+                                            }
+                                            break;
+
+                                        case "TimePlayer2":
+                                            if (reader.Read())
+                                            {
+                                                timePlayer2 = reader.Value.Trim();
+                                            }
+                                            break;
 
                                         case "Board":
                                             if (reader.Read())
@@ -479,9 +540,13 @@ namespace Panothelo
 
                         try
                         {
+                            timerAddPlayer1[0] = int.Parse(timePlayer1.Split(':')[0]);
+                            timerAddPlayer1[1] = int.Parse(timePlayer1.Split(':')[1]);
+
+                            timerAddPlayer2[0] = int.Parse(timePlayer2.Split(':')[0]);
+                            timerAddPlayer2[1] = int.Parse(timePlayer2.Split(':')[1]);
 
                             strTabBoard = strBoard.Split(',');
-                            Console.Write(strTabBoard);
                             int k = 0;
                             for (int i = 0; i < gridColumn; i++)
                             {
@@ -493,6 +558,7 @@ namespace Panothelo
                                 }
                             }
                             GameBoard.Children.Clear();
+                            InitializeGameFromLoad(namePlayer1, namePlayer2);
                             InitializeBoard();
                             update();
 
