@@ -31,7 +31,6 @@ namespace Panothelo
         Player player1;
         Player player2;
 
-        List<int> listPossibility;
         List<int> listLastPossible;
 
         Board board;
@@ -68,28 +67,34 @@ namespace Panothelo
 
             foreach (int i in board.getPossibleMoves(turnPlayer1))
             {
-                listPossibility.Add(i);
-            }
+                listLastPossible.Add(i);
 
-            foreach (int pos in listPossibility)
-            {
-                int posCell = pos;
-                listLastPossible.Add(posCell);
-
-                lblUpdate = GameBoard.Children[posCell] as Label;
+                lblUpdate = GameBoard.Children[i] as Label;
                 lblUpdate.Background = Brushes.LightGray;
 
             }
 
-            listPossibility.Clear();
+            int actualWinner=-1;
+            int scoreW = board.GetWhiteScore();
+            int scoreB = board.GetBlackScore();
+
+            if (scoreW < scoreB)
+                actualWinner = 0;
+            else if (scoreW > scoreB)
+                actualWinner = 1;
+
+            if (actualWinner == 1)
+                GameBoard.Background = Brushes.ForestGreen;
+            else if (actualWinner==0)
+                GameBoard.Background = Brushes.SandyBrown;
 
             if (board.checkBoardFull())
             {
-                MessageBox.Show(getWinnerMsg());
+                MessageBox.Show(getWinnerMsg(actualWinner));
             }else if (listLastPossible.Count==0)
             {
                 if(nbPass>0)
-                    MessageBox.Show(getWinnerMsg());
+                    MessageBox.Show(getWinnerMsg(actualWinner));
                 else
                 {
                     turnPlayer1 = !turnPlayer1;
@@ -102,17 +107,19 @@ namespace Panothelo
             }
         }
 
-        private string getWinnerMsg()
+        private string getWinnerMsg(int w)
         {
             if (turnPlayer1)
                 swPlayer1.Stop();
             else
                 swPlayer2.Stop();
 
-            if (board.GetWhiteScore() < board.GetBlackScore())
-                return "Congratulation "+ player2.Name +",\nYou won!";
-            else
+            if (w == 1)
+                return "Congratulation " + player2.Name + ",\nYou won!";
+            else if (w == 0)
                 return "Congratulation " + player1.Name + ",\nYou won!";
+            else
+                return "Congratulation to both,\nIt's a draw!";
         }
 
         private void InitializeGame()
@@ -133,7 +140,6 @@ namespace Panothelo
             lblScorePlayer1.Content = "Score : " + 2;
             lblScorePlayer2.Content = "Score : " + 2;
 
-            listPossibility = new List<int>();
             listLastPossible = new List<int>();
 
             board = new Board(gridColumn, gridRow);

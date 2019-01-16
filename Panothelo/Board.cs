@@ -165,7 +165,7 @@ namespace Panothelo
                     }
                 }
             }
-            //listPossibleMoves.ForEach(el => Console.WriteLine(el[0] + ", " + el[1]));
+            listPossibleMoves.ForEach(el => Console.WriteLine(el));
             return listPossibleMoves;
         }
 
@@ -233,7 +233,9 @@ namespace Panothelo
             {
                 if (matBoard[i, line] == -1)
                     return false;
-                if (matBoard[i, line] == tokenS && !okMove)
+                if (matBoard[i, line] == tokenE && i > column - 2)
+                    return false;
+                else if (matBoard[i, line] == tokenS && !okMove)
                 {
                     okMove = true;
                 }
@@ -256,7 +258,9 @@ namespace Panothelo
             {
                 if (matBoard[i, line] == -1)
                     return false;
-                if (matBoard[i, line] == tokenS && !okMove)
+                if (matBoard[i, line] == tokenE && i < column + 2)
+                    return false;
+                else if (matBoard[i, line] == tokenS && !okMove)
                 {
                     okMove = true;
                 }
@@ -279,7 +283,9 @@ namespace Panothelo
             {
                 if (matBoard[column, j] == -1)
                     return false;
-                if (matBoard[column, j] == tokenS && !okMove)
+                if (matBoard[column, j] == tokenE && j > line - 2)
+                    return false;
+                else if (matBoard[column, j] == tokenS && !okMove)
                 {
                     okMove = true;
                 }
@@ -302,7 +308,9 @@ namespace Panothelo
             {
                 if (matBoard[column, j] == -1)
                     return false;
-                if (matBoard[column, j] == tokenS && !okMove)
+                if (matBoard[column, j] == tokenE && j < line + 2)
+                    return false;
+                else if (matBoard[column, j] == tokenS && !okMove)
                 {
                     okMove = true;
                 }
@@ -330,7 +338,9 @@ namespace Panothelo
             {
                 if (matBoard[column - s, line - s] == -1)
                     return false;
-                if (matBoard[column - s, line - s] == tokenS && !okMove)
+                if (matBoard[column - s, line - s] == tokenE && s<2)
+                    return false;
+                else if (matBoard[column - s, line - s] == tokenS && !okMove)
                 {
                     okMove = true;
                 }
@@ -358,7 +368,9 @@ namespace Panothelo
             {
                 if (matBoard[column - s, line + s] == -1)
                     return false;
-                if (matBoard[column - s, line + s] == tokenS && !okMove)
+                if (matBoard[column - s, line + s] == tokenE && s < 2)
+                    return false;
+                else if (matBoard[column - s, line + s] == tokenS && !okMove)
                 {
                     okMove = true;
                 }
@@ -386,7 +398,9 @@ namespace Panothelo
             {
                 if (matBoard[column + s, line - s] == -1)
                     return false;
-                if (matBoard[column + s, line - s] == tokenS && !okMove)
+                if (matBoard[column + s, line - s] == tokenE && s < 2)
+                    return false;
+                else if (matBoard[column + s, line - s] == tokenS && !okMove)
                 {
                     okMove = true;
                 }
@@ -415,7 +429,9 @@ namespace Panothelo
             {
                 if (matBoard[column + s, line + s] == -1)
                     return false;
-                if (matBoard[column + s, line + s] == tokenS && !okMove)
+                if (matBoard[column + s, line + s] == tokenE && s < 2)
+                    return false;
+                else if (matBoard[column + s, line + s] == tokenS && !okMove)
                 {
                     okMove = true;
                 }
