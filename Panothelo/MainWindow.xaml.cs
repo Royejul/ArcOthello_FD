@@ -37,6 +37,7 @@ namespace Panothelo
         Board board;
 
         bool turnPlayer1;
+        int nbPass;
 
         DispatcherTimer timerPlayer1;
         DispatcherTimer timerPlayer2;
@@ -82,11 +83,36 @@ namespace Panothelo
 
             listPossibility.Clear();
 
-            if (listLastPossible.Count == 0)
+            if (board.checkBoardFull())
             {
-                turnPlayer1 = !turnPlayer1;
-                //update();
+                MessageBox.Show(getWinnerMsg());
+            }else if (listLastPossible.Count==0)
+            {
+                if(nbPass>0)
+                    MessageBox.Show(getWinnerMsg());
+                else
+                {
+                    turnPlayer1 = !turnPlayer1;
+                    nbPass = 1;
+                    update();
+                }
+            }else
+            {
+                nbPass = 0;
             }
+        }
+
+        private string getWinnerMsg()
+        {
+            if (turnPlayer1)
+                swPlayer1.Stop();
+            else
+                swPlayer2.Stop();
+
+            if (board.GetWhiteScore() < board.GetBlackScore())
+                return "Congratulation "+ player2.Name +",\nYou won!";
+            else
+                return "Congratulation " + player1.Name + ",\nYou won!";
         }
 
         private void InitializeGame()
@@ -113,6 +139,7 @@ namespace Panothelo
             board = new Board(gridColumn, gridRow);
 
             turnPlayer1 = true;
+            nbPass = 0;
             TimerInitialize();
         }
 
