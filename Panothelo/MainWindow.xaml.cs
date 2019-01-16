@@ -45,29 +45,31 @@ namespace Panothelo
             InitializeComponent();
             InitializeGame();
             InitializeBoard();
-
-
         }
 
         private void InitializeGame()
         {
-            blackPawn = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/Panothelo;component/PawnImage/BlackPawn.png")));
-            whitePawn = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/Panothelo;component/PawnImage/WhitePawn.png")));
+            blackPawn = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/Panothelo;component/PawnImage/Stump.png")));
+            whitePawn = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/Panothelo;component/PawnImage/Leaf.png")));
+            lblPlayerImage.Background = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/Panothelo;component/PawnImage/Panoramix.png")));
 
             player1 = new Player("Jeremy", 1, whitePawn);
             player2 = new Player("Julien", 2, blackPawn);
 
             lblNamePlayer1.Content = player1.Name;
+            lblNamePlayer1.Background = Brushes.Green;
+
             lblNamePlayer2.Content = player2.Name;
+
+            lblScorePlayer1.Content = "Score : " + 2;
+            lblScorePlayer2.Content = "Score : " + 2;
+
 
             board = new Board(gridColumn, gridRow);
 
             TimerInitialize();
 
             turnPlayer = 1;
-
-
-
         }
 
         private void InitializeBoard()
@@ -98,11 +100,8 @@ namespace Panothelo
                     Grid.SetRow(lblGrid, j);
                     Grid.SetColumn(lblGrid, i);
                     Board.Children.Add(lblGrid);
-
-                    
                 }
             }
-
             swPlayer1.Start();
         }
 
@@ -120,24 +119,18 @@ namespace Panothelo
         private void MouseButtonUpGrid(object sender, System.Windows.Input.MouseEventArgs e)
         {
             Label lblGrid = sender as Label;
+
             int col = Grid.GetColumn(lblGrid);
             int row = Grid.GetRow(lblGrid);
 
-            //MessageBox.Show(col.ToString() + " - " + row.ToString());
-
             if (board.GetBoard()[col, row] == -1)
             {
-                
-                if (turnPlayer % 2 == 0)
+                if (PlayerTurn())
                 {
                     lblGrid.Background = player2.ImagePawn;
                     board.GetBoard()[col, row] = 1;
                     lblScorePlayer2.Content = "Score : " + board.GetBlackScore();
                     player2.Score = board.GetBlackScore();
-
-                    swPlayer2.Stop();
-                    swPlayer1.Start();
-
                 }
                 else
                 {
@@ -145,11 +138,36 @@ namespace Panothelo
                     board.GetBoard()[col, row] = 0;
                     lblScorePlayer1.Content = "Score : " + board.GetWhiteScore();
                     player1.Score = board.GetWhiteScore();
-
-                    swPlayer1.Stop();
-                    swPlayer2.Start();
                 }
                 turnPlayer++;
+            }
+        }
+
+        private bool PlayerTurn()
+        {
+            if(turnPlayer % 2 == 0)
+            {
+                lblNamePlayer1.Background = Brushes.Green;
+                lblNamePlayer2.Background = Brushes.White;
+
+                lblPlayerImage.Background = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/Panothelo;component/PawnImage/Panoramix.png")));
+
+                swPlayer2.Stop();
+                swPlayer1.Start();
+
+                return true;
+            }
+            else
+            {
+                lblNamePlayer1.Background = Brushes.White;
+                lblNamePlayer2.Background = Brushes.Green;
+
+                lblPlayerImage.Background = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/Panothelo;component/PawnImage/Romain.png")));
+
+                swPlayer1.Stop();
+                swPlayer2.Start();
+
+                return false;
             }
         }
 
@@ -157,12 +175,10 @@ namespace Panothelo
         {
             timerPlayer1 = new DispatcherTimer();
             timerPlayer1.Tick += new EventHandler(TimerTick);
-            timerPlayer1.Interval = new TimeSpan(0, 0, 0, 0, 1);
             timerPlayer1.Start();
 
             timerPlayer2 = new DispatcherTimer();
             timerPlayer2.Tick += new EventHandler(TimerTick);
-            timerPlayer2.Interval = new TimeSpan(0, 0, 0, 0, 1);
             timerPlayer2.Start();
 
             swPlayer1 = new Stopwatch();
@@ -179,6 +195,111 @@ namespace Panothelo
             {
                 lblTimerPlayer2.Content = String.Format("{0:00}:{1:00}", swPlayer2.Elapsed.Minutes, swPlayer2.Elapsed.Seconds);
             }
+        }
+
+        private void MenuQuit_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void MenuAbout_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("About : Feuillade Julien and Dubois Jeremy.\n Othello C# 2018-2019.\n HE-ARC");
+        }
+
+        private void MenuNew_Click(object sender, RoutedEventArgs e)
+        {
+            Board.Children.Clear();
+            InitializeGame();
+            InitializeBoard();
+        }
+
+        /// <summary>
+        /// Save method who writes all parameter to an extern XML file
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MenuSave_Click(object sender, RoutedEventArgs e)
+        {
+           // if(turnPlayer % 2 == 0)
+                
+
+            string filename = "", strBoard = "";
+
+            System.Windows.Forms.SaveFileDialog saveFileDialog = new System.Windows.Forms.SaveFileDialog
+            {
+                Title = "Save the game",
+                DefaultExt = "xml",
+                CheckPathExists = true,
+                Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*"
+            };
+
+            if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                filename = saveFileDialog.FileName;
+
+                strBoard = board.GetBoard().ToString();
+
+                XmlWriterSettings settings = new XmlWriterSettings
+                {
+                    Indent = true,
+                    IndentChars = ("\t"),
+                };
+
+                //Write data on an external XML file
+                try
+                {
+                    using (XmlWriter writer = XmlWriter.Create(filename, settings))
+                    {
+
+                        writer.WriteProcessingInstruction("xml", "version='1.0' encoding='UTF-8'");
+
+                        writer.WriteStartElement("OthelloGame");
+
+                        writer.WriteStartElement("Player1");
+                        writer.WriteElementString("Name", player1.Name);
+                        writer.WriteElementString("Time", swPlayer1.Elapsed.ToString("mm\\:ss\\:ff"));
+                        writer.WriteElementString("Score", player1.Score.ToString());
+                        writer.WriteEndElement();
+
+
+                        writer.WriteStartElement("Player2");
+                        writer.WriteElementString("Name", player2.Name);
+                        writer.WriteElementString("Time", swPlayer2.Elapsed.ToString("mm\\:ss\\:ff"));
+                        writer.WriteElementString("Score", player2.Score.ToString());
+                        writer.WriteEndElement();
+
+                        writer.WriteElementString("Turn", turnPlayer.ToString());
+
+
+                        writer.WriteElementString("Board", strBoard);
+
+                        writer.WriteEndElement();
+                        writer.WriteEndDocument();
+
+                        writer.Flush();
+                        writer.Close();
+
+                    }
+                }
+                catch (ArgumentException)
+                {
+                    MessageBox.Show("Error while writing XML file");
+                }
+
+            }
+
+
+        }
+
+        /// <summary>
+        /// Load method who reads the XML file to To fill the struct with the read data
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MenuLoad_Click(object sender, RoutedEventArgs e)
+        {
+           
         }
     }
 }
