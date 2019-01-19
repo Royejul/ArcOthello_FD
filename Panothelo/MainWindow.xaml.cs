@@ -1,29 +1,30 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Diagnostics;
-using System.Timers;
 using System.Windows.Threading;
 using System.ComponentModel;
 using System.Xml;
-using System.Threading.Tasks;
 
 namespace Panothelo
 {
     /// <summary>
     /// Logique d'interaction pour MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
-
-
         int gridColumn = 9;
         int gridRow = 7;
+
+        public string TimePlayer1 { get; set; }
+        public string TimePlayer2 { get; set; }
+
+        public string ScorePlayer1 { get; set; }
+        public string ScorePlayer2 { get; set; }
 
         ImageBrush blackPawn;
         ImageBrush whitePawn;
@@ -47,17 +48,27 @@ namespace Panothelo
         int[] timerAddPlayer1;
         int[] timerAddPlayer2;
 
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
 
         public MainWindow()
         {
-            InitializeComponent();
-            InitializeGame();
-            InitializeBoard();
-            update();
+            this.DataContext = this;
 
+            InitializeComponent();
+            InitGame();
+            InitBoard();
+            UpdateDisplay();
         }
 
-        private void update()
+        /// <summary>
+        /// Update the grid display
+        /// </summary>
+        private void UpdateDisplay()
         {
             Label lblUpdate;
 
@@ -67,7 +78,7 @@ namespace Panothelo
             }
             listLastPossible.Clear();
 
-            foreach (int i in board.getPossibleMoves(turnPlayer1))
+            foreach (int i in board.GetPossibleMoves(turnPlayer1))
             {
                 listLastPossible.Add(i);
 
@@ -76,7 +87,7 @@ namespace Panothelo
 
             }
 
-            int actualWinner=-1;
+            int actualWinner = -1;
             int scoreW = board.GetWhiteScore();
             int scoreB = board.GetBlackScore();
 
@@ -87,29 +98,47 @@ namespace Panothelo
 
             if (actualWinner == 1)
                 GameBoard.Background = Brushes.ForestGreen;
-            else if (actualWinner==0)
-                GameBoard.Background = Brushes.SandyBrown;
+            else if (actualWinner == 0)
+                GameBoard.Background = Brushes.SaddleBrown;
 
-            if (board.checkBoardFull())
+            if (board.CheckBoardFull())
             {
-                MessageBox.Show(getWinnerMsg(actualWinner));
-            }else if (listLastPossible.Count==0)
+                MessageBox.Show(GetWinnerMessage(actualWinner));
+            }
+            else if (listLastPossible.Count == 0)
             {
-                if(nbPass>0)
-                    MessageBox.Show(getWinnerMsg(actualWinner));
+                if (nbPass > 0)
+                    MessageBox.Show(GetWinnerMessage(actualWinner));
                 else
                 {
                     turnPlayer1 = !turnPlayer1;
                     nbPass = 1;
-                    update();
+                    UpdateDisplay();
                 }
-            }else
+            }
+            else
             {
                 nbPass = 0;
             }
         }
 
-        private string getWinnerMsg(int w)
+        /// <summary>
+        /// Update the score
+        /// </summary>
+        private void UpdateScore()
+        {
+            ScorePlayer1 = "Score : " + board.GetWhiteScore().ToString();
+            OnPropertyChanged("ScorePlayer1");
+            ScorePlayer2 = "Score : " + board.GetBlackScore().ToString();
+            OnPropertyChanged("ScorePlayer2");
+        }
+
+        /// <summary>
+        /// Winner message
+        /// </summary>
+        /// <param name="w"></param>
+        /// <returns></returns>
+        private string GetWinnerMessage(int w)
         {
             if (turnPlayer1)
                 swPlayer1.Stop();
@@ -117,21 +146,24 @@ namespace Panothelo
                 swPlayer2.Stop();
 
             if (w == 1)
-                return "Congratulation " + player2.Name + ",\nYou won!";
-            else if (w == 0)
                 return "Congratulation " + player1.Name + ",\nYou won!";
+            else if (w == 0)
+                return "Congratulation " + player2.Name + ",\nYou won!";
             else
                 return "Congratulation to both,\nIt's a draw!";
         }
 
-        private void InitializeGame()
+        /// <summary>
+        /// Init data for the game
+        /// </summary>
+        private void InitGame()
         {
             blackPawn = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/Panothelo;component/PawnImage/Stump.png")));
             whitePawn = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/Panothelo;component/PawnImage/Leaf.png")));
             lblPlayerImage.Background = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/Panothelo;component/PawnImage/Panoramix.png")));
 
-            player1 = new Player("Jeremy", whitePawn);
-            player2 = new Player("Julien", blackPawn);
+            player1 = new Player("Player1", whitePawn);
+            player2 = new Player("Player2", blackPawn);
 
             lblNamePlayer1.Content = player1.Name;
             lblNamePlayer1.Background = Brushes.Green;
@@ -143,48 +175,49 @@ namespace Panothelo
 
             board = new Board(gridColumn, gridRow);
 
-            lblScorePlayer1.Content = "Score : " + board.GetWhiteScore();
-            lblScorePlayer2.Content = "Score : " + board.GetBlackScore();
+            UpdateScore();
 
             timerAddPlayer1 = new int[2];
             timerAddPlayer2 = new int[2];
 
-            timerAddPlayer1[0] = 0;
-            timerAddPlayer1[1] = 0;
-            timerAddPlayer2[0] = 0;
-            timerAddPlayer2[1] = 0;
-
             turnPlayer1 = true;
             nbPass = 0;
-            TimerInitialize();
+            TimerInit();
         }
 
-        private void InitializeGameFromLoad(String namePlayer1, String namePlayer2)
+        /// <summary>
+        /// Init data for the game from a file
+        /// </summary>
+        /// <param name="namePlayer1"></param>
+        /// <param name="namePlayer2"></param>
+        private void InitGameFromLoadFile(String namePlayer1, String namePlayer2)
         {
             player1 = new Player(namePlayer1, whitePawn);
             player2 = new Player(namePlayer2, blackPawn);
 
             lblNamePlayer1.Content = player1.Name;
             lblNamePlayer2.Content = player2.Name;
-            if(turnPlayer1)
+            if (turnPlayer1)
             {
                 lblNamePlayer1.Background = Brushes.Green;
                 lblNamePlayer2.Background = Brushes.White;
                 lblPlayerImage.Background = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/Panothelo;component/PawnImage/Panoramix.png")));
             }
-            else{
+            else
+            {
                 lblNamePlayer2.Background = Brushes.Green;
                 lblNamePlayer1.Background = Brushes.White;
                 lblPlayerImage.Background = new ImageBrush(new BitmapImage(new Uri(@"pack://application:,,,/Panothelo;component/PawnImage/Romain.png")));
             }
 
-            lblScorePlayer1.Content = "Score : " + board.GetWhiteScore();
-            lblScorePlayer2.Content = "Score : " + board.GetBlackScore();
-
-            TimerInitialize();
+            UpdateScore();
+            TimerInit();
         }
 
-        private void InitializeBoard()
+        /// <summary>
+        /// Init all label on the grid
+        /// </summary>
+        private void InitBoard()
         {
             for (int i = 0; i < gridColumn; i++)
             {
@@ -220,70 +253,46 @@ namespace Panothelo
                 swPlayer2.Start();
         }
 
-        private void MouseEnterGrid(object sender, System.Windows.Input.MouseEventArgs e)
+        /// <summary>
+        /// Init timer
+        /// </summary>
+        private void TimerInit()
         {
-            Label lblGrid = sender as Label;
-            int col = Grid.GetColumn(lblGrid);
-            int row = Grid.GetRow(lblGrid);
-            int posClick = col * gridRow + row;
+            timerPlayer1 = new DispatcherTimer();
+            timerPlayer1.Tick += new EventHandler(TimerTick);
+            timerPlayer1.Start();
 
-            if (listLastPossible.Contains(posClick))
+            timerPlayer2 = new DispatcherTimer();
+            timerPlayer2.Tick += new EventHandler(TimerTick);
+            timerPlayer2.Start();
+
+            swPlayer1 = new Stopwatch();
+            swPlayer2 = new Stopwatch();
+        }
+
+        /// <summary>
+        /// Timer tick every second
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TimerTick(object sender, EventArgs e)
+        {
+            if (sender == timerPlayer1)
             {
-                if (turnPlayer1)
-                    lblGrid.Background = player1.ImagePawn;
-                else
-                    lblGrid.Background = player2.ImagePawn;
+                TimePlayer1 = String.Format("{0:00}:{1:00}", swPlayer1.Elapsed.Minutes + timerAddPlayer1[0], swPlayer1.Elapsed.Seconds + timerAddPlayer1[1]);
+                OnPropertyChanged("TimePlayer1");
+            }
+            else
+            {
+                TimePlayer2 = String.Format("{0:00}:{1:00}", swPlayer2.Elapsed.Minutes + timerAddPlayer2[0], swPlayer2.Elapsed.Seconds + timerAddPlayer2[1]);
+                OnPropertyChanged("TimePlayer2");
             }
         }
 
-        private void MouseLeaveGrid(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            Label lblGrid = sender as Label;
-            int col = Grid.GetColumn(lblGrid);
-            int row = Grid.GetRow(lblGrid);
-            int posClick = col * gridRow + row;
-
-            if (listLastPossible.Contains(posClick))
-            {
-                update();
-            }
-        }
-
-        private void MouseButtonDownGrid(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            Label lblGrid = sender as Label;
-
-            int col = Grid.GetColumn(lblGrid);
-            int row = Grid.GetRow(lblGrid);
-            int posClick = col * gridRow + row;
-
-            if (listLastPossible.Contains(posClick))
-            {
-                board.PlayMove(col, row, turnPlayer1);
-                GameBoard.Children.Clear();
-                InitializeBoard();
-
-                listLastPossible.Remove(posClick);
-
-                if (PlayerTurn())
-                {
-                    lblGrid.Background = player2.ImagePawn;
-                    board.GetBoard()[col, row] = 1;
-                    turnPlayer1 = true;
-                }
-                else
-                {
-                    lblGrid.Background = player1.ImagePawn;
-                    board.GetBoard()[col, row] = 0;
-                    turnPlayer1 = false;
-                }
-
-                lblScorePlayer1.Content = "Score : " + board.GetWhiteScore();
-                lblScorePlayer2.Content = "Score : " + board.GetBlackScore();
-                update();
-            }
-        }
-
+        /// <summary>
+        /// Witch player turn
+        /// </summary>
+        /// <returns></returns>
         private bool PlayerTurn()
         {
             if (!turnPlayer1)
@@ -312,51 +321,123 @@ namespace Panothelo
             }
         }
 
-        private void TimerInitialize()
+        /// <summary>
+        /// Mouse enter on grid
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MouseEnterGrid(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            timerPlayer1 = new DispatcherTimer();
-            timerPlayer1.Tick += new EventHandler(TimerTick);
-            timerPlayer1.Start();
+            Label lblGrid = sender as Label;
+            int col = Grid.GetColumn(lblGrid);
+            int row = Grid.GetRow(lblGrid);
+            int posClick = col * gridRow + row;
 
-            timerPlayer2 = new DispatcherTimer();
-            timerPlayer2.Tick += new EventHandler(TimerTick);
-            timerPlayer2.Start();
-
-            swPlayer1 = new Stopwatch();
-            swPlayer2 = new Stopwatch();
-        }
-
-        private void TimerTick(object sender, EventArgs e)
-        {
-            if (sender == timerPlayer1)
+            if (listLastPossible.Contains(posClick))
             {
-                lblTimerPlayer1.Content = String.Format("{0:00}:{1:00}", swPlayer1.Elapsed.Minutes + timerAddPlayer1[0], swPlayer1.Elapsed.Seconds + timerAddPlayer1[1]);
-            }
-            else
-            {
-                lblTimerPlayer2.Content = String.Format("{0:00}:{1:00}", swPlayer2.Elapsed.Minutes + timerAddPlayer2[0], swPlayer2.Elapsed.Seconds + timerAddPlayer2[1]);
+                if (turnPlayer1)
+                    lblGrid.Background = player1.ImagePawn;
+                else
+                    lblGrid.Background = player2.ImagePawn;
             }
         }
 
-        private void MenuQuit_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Mouse leave on grid
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MouseLeaveGrid(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            Label lblGrid = sender as Label;
+            int col = Grid.GetColumn(lblGrid);
+            int row = Grid.GetRow(lblGrid);
+            int posClick = col * gridRow + row;
+
+            if (listLastPossible.Contains(posClick))
+            {
+                UpdateDisplay();
+            }
+        }
+
+        /// <summary>
+        /// Mouse down on grid
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MouseButtonDownGrid(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            Label lblGrid = sender as Label;
+
+            int col = Grid.GetColumn(lblGrid);
+            int row = Grid.GetRow(lblGrid);
+            int posClick = col * gridRow + row;
+
+            if (listLastPossible.Contains(posClick))
+            {
+                board.PlayMove(col, row, turnPlayer1);
+                GameBoard.Children.Clear();
+                InitBoard();
+
+                listLastPossible.Remove(posClick);
+
+                if (PlayerTurn())
+                {
+                    lblGrid.Background = player2.ImagePawn;
+                    board.GetBoard()[col, row] = 1;
+                    turnPlayer1 = true;
+                }
+                else
+                {
+                    lblGrid.Background = player1.ImagePawn;
+                    board.GetBoard()[col, row] = 0;
+                    turnPlayer1 = false;
+                }
+
+                UpdateScore();
+                UpdateDisplay();
+            }
+        }
+
+        /// <summary>
+        /// Menu who exit the app
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MenuQuit(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
 
-        private void MenuAbout_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Menu for about
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MenuAbout(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Othello C# - HE-ARC \nAuteur : Feuillade Julien et Dubois Jeremy");
         }
 
-        private void MenuNew_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Menu for a new game
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MenuNew(object sender, RoutedEventArgs e)
         {
             GameBoard.Children.Clear();
-            InitializeGame();
-            InitializeBoard();
-            update();
+            InitGame();
+            InitBoard();
+            UpdateDisplay();
         }
 
-        private void MenuSave_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Menu save the game
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MenuSave(object sender, RoutedEventArgs e)
         {
             if (turnPlayer1)
                 swPlayer1.Stop();
@@ -384,7 +465,6 @@ namespace Panothelo
                     IndentChars = ("\t"),
                 };
 
-                //Write data on an external XML file
                 try
                 {
                     using (XmlWriter writer = XmlWriter.Create(filename, settings))
@@ -394,7 +474,6 @@ namespace Panothelo
                         writer.WriteStartElement("OthelloGame");
 
                         writer.WriteElementString("Turn", turnPlayer1.ToString());
-
                         writer.WriteElementString("Board", strBoard);
 
                         writer.WriteElementString("NamePlayer1", player1.Name);
@@ -419,7 +498,6 @@ namespace Panothelo
                 {
                     MessageBox.Show("Error while writing XML file");
                 }
-
             }
             else
             {
@@ -431,11 +509,11 @@ namespace Panothelo
         }
 
         /// <summary>
-        /// Load method who reads the XML file to To fill the struct with the read data
+        /// Menu load data from a XML file
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void MenuLoad_Click(object sender, RoutedEventArgs e)
+        private void MenuLoad(object sender, RoutedEventArgs e)
         {
             if (turnPlayer1)
                 swPlayer1.Stop();
@@ -452,7 +530,7 @@ namespace Panothelo
             string timePlayer2 = "";
 
 
-            System.Windows.Forms.OpenFileDialog ofd = new System.Windows.Forms.OpenFileDialog
+            System.Windows.Forms.OpenFileDialog fileDiag = new System.Windows.Forms.OpenFileDialog
             {
                 Filter = "XML Files (*.xml)|*.xml",
                 FilterIndex = 0,
@@ -460,18 +538,16 @@ namespace Panothelo
             };
 
 
-            if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            if (fileDiag.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                if (!String.Equals(Path.GetExtension(ofd.FileName),
+                if (!String.Equals(Path.GetExtension(fileDiag.FileName),
                                    ".xml",
                                    StringComparison.OrdinalIgnoreCase))
                 {
-                    // Invalid file type selected; display an error.
-                    MessageBox.Show("You must select an XML file.",
+                    MessageBox.Show("Select an XML file.",
                                     "Invalid File Type",
                                     MessageBoxButton.OK,
                                     MessageBoxImage.Error);
-
                 }
                 else
                 {
@@ -480,7 +556,7 @@ namespace Panothelo
                         Async = true
                     };
 
-                    using (XmlReader reader = XmlReader.Create(ofd.FileName, settings))
+                    using (XmlReader reader = XmlReader.Create(fileDiag.FileName, settings))
                     {
                         try
                         {
@@ -553,14 +629,14 @@ namespace Panothelo
                                 for (int j = 0; j < gridRow; j++)
                                 {
                                     board.GetBoard()[i, j] = int.Parse(strTabBoard[k]);
-                                    
+
                                     k++;
                                 }
                             }
                             GameBoard.Children.Clear();
-                            InitializeGameFromLoad(namePlayer1, namePlayer2);
-                            InitializeBoard();
-                            update();
+                            InitGameFromLoadFile(namePlayer1, namePlayer2);
+                            InitBoard();
+                            UpdateDisplay();
 
                         }
                         catch (NullReferenceException)

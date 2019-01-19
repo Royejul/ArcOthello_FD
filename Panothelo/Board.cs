@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel;
 
 namespace Panothelo
 {
@@ -18,6 +16,11 @@ namespace Panothelo
 
         List<int> listPossibleMoves;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="col"></param>
+        /// <param name="line"></param>
         public Board(int col, int line)
         {
             this.nbCol = col;
@@ -26,32 +29,43 @@ namespace Panothelo
             listTokenP2 = new List<int[]>();
             listPossibleMoves = new List<int>();
             matBoard = new int[col, line];
-            initBoard();
+            InitBoard();
         }
 
+        /// <summary>
+        /// Get the score of the black player
+        /// </summary>
+        /// <returns></returns>
         public int GetBlackScore()
         {
             int score = 0;
-            for (int i=0; i<nbCol;i++)
+            for (int i = 0; i < nbCol; i++)
             {
-                for(int j=0;j<nbLin;j++)
+                for (int j = 0; j < nbLin; j++)
                 {
                     if (matBoard[i, j] == 1)
                         score++;
                 }
             }
             return score;
-            //return listTokenP2.Count;
         }
 
+        /// <summary>
+        /// Get the board
+        /// </summary>
+        /// <returns></returns>
         public int[,] GetBoard()
         {
             return matBoard;
         }
 
+        /// <summary>
+        /// Get the name of the IA
+        /// </summary>
+        /// <returns></returns>
         public string GetName()
         {
-            return "IAName";
+            return "IAFD";
         }
 
         public Tuple<int, int> GetNextMove(int[,] game, int level, bool whiteTurn)
@@ -59,6 +73,10 @@ namespace Panothelo
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Get the score of the white player
+        /// </summary>
+        /// <returns></returns>
         public int GetWhiteScore()
         {
             int score = 0;
@@ -71,77 +89,90 @@ namespace Panothelo
                 }
             }
             return score;
-            //return listTokenP1.Count;
         }
 
+        /// <summary>
+        /// Check if the move is playable
+        /// </summary>
+        /// <param name="column"></param>
+        /// <param name="line"></param>
+        /// <param name="isWhite"></param>
+        /// <returns></returns>
         public bool IsPlayable(int column, int line, bool isWhite)
         {
-            if (checkLeft(column, line, isWhite))
+            if (CheckLeft(column, line, isWhite))
                 return true;
-            if (checkRight(column, line, isWhite))
+            if (CheckRight(column, line, isWhite))
                 return true;
-            if (checkTop(column, line, isWhite))
+            if (CheckTop(column, line, isWhite))
                 return true;
-            if (checkBottom(column, line, isWhite))
+            if (CheckBottom(column, line, isWhite))
                 return true;
-            if (checkDLT(column, line, isWhite))
+            if (CheckDiagLeftTop(column, line, isWhite))
                 return true;
-            if (checkDLB(column, line, isWhite))
+            if (CheckDiagLeftBottom(column, line, isWhite))
                 return true;
-            if (checkDRT(column, line, isWhite))
+            if (CheckDiagRightTop(column, line, isWhite))
                 return true;
-            if (checkDRB(column, line, isWhite))
+            if (CheckDiagRightBottom(column, line, isWhite))
                 return true;
             return false;
         }
 
+        /// <summary>
+        /// Play the move
+        /// </summary>
+        /// <param name="column"></param>
+        /// <param name="line"></param>
+        /// <param name="isWhite"></param>
+        /// <returns></returns>
         public bool PlayMove(int column, int line, bool isWhite)
         {
             int tok = 1;
             bool allOK = false;
             if (isWhite)
                 tok = 0;
-            if (checkLeft(column, line, isWhite))
+            if (CheckLeft(column, line, isWhite))
             {
-                swapToken(column - 1, line, -1, 0, tok);
+                SwapPawn(column - 1, line, -1, 0, tok);
                 allOK = true;
             }
-            if (checkRight(column, line, isWhite))
+            if (CheckRight(column, line, isWhite))
             {
-                swapToken(column + 1, line, 1, 0, tok);
+                SwapPawn(column + 1, line, 1, 0, tok);
                 allOK = true;
             }
-            if (checkTop(column, line, isWhite))
+            if (CheckTop(column, line, isWhite))
             {
-                swapToken(column, line - 1, 0, -1, tok);
+                SwapPawn(column, line - 1, 0, -1, tok);
                 allOK = true;
             }
-            if (checkBottom(column, line, isWhite))
+            if (CheckBottom(column, line, isWhite))
             {
-                swapToken(column, line + 1, 0, 1, tok);
+                SwapPawn(column, line + 1, 0, 1, tok);
                 allOK = true;
             }
-            if (checkDLT(column, line, isWhite))
+            if (CheckDiagLeftTop(column, line, isWhite))
             {
-                swapToken(column - 1, line - 1, -1, -1, tok);
+                SwapPawn(column - 1, line - 1, -1, -1, tok);
                 allOK = true;
             }
-            if (checkDLB(column, line, isWhite))
+            if (CheckDiagLeftBottom(column, line, isWhite))
             {
-                swapToken(column - 1, line + 1, -1, 1, tok);
+                SwapPawn(column - 1, line + 1, -1, 1, tok);
                 allOK = true;
             }
-            if (checkDRT(column, line, isWhite))
+            if (CheckDiagRightTop(column, line, isWhite))
             {
-                swapToken(column + 1, line - 1, 1, -1, tok);
+                SwapPawn(column + 1, line - 1, 1, -1, tok);
                 allOK = true;
             }
-            if (checkDRB(column, line, isWhite))
+            if (CheckDiagRightBottom(column, line, isWhite))
             {
-                swapToken(column + 1, line + 1, 1, 1, tok);
+                SwapPawn(column + 1, line + 1, 1, 1, tok);
                 allOK = true;
             }
-            if(allOK)
+            if (allOK)
             {
                 matBoard[column, line] = tok;
                 return allOK;
@@ -149,14 +180,19 @@ namespace Panothelo
             return allOK;
         }
 
-        public List<int> getPossibleMoves(bool isWhite)
+        /// <summary>
+        /// Get in a list all the possible moves
+        /// </summary>
+        /// <param name="isWhite"></param>
+        /// <returns></returns>
+        public List<int> GetPossibleMoves(bool isWhite)
         {
             listPossibleMoves.Clear();
-            for (int i=0;i<nbCol;i++)
+            for (int i = 0; i < nbCol; i++)
             {
-                for(int j=0;j<nbLin;j++)
+                for (int j = 0; j < nbLin; j++)
                 {
-                    if(matBoard[i,j]==-1)
+                    if (matBoard[i, j] == -1)
                     {
                         if (IsPlayable(i, j, isWhite))
                         {
@@ -169,11 +205,15 @@ namespace Panothelo
             return listPossibleMoves;
         }
 
-        public bool checkBoardFull()
+        /// <summary>
+        /// Check the board if it is full
+        /// </summary>
+        /// <returns></returns>
+        public bool CheckBoardFull()
         {
-            for(int i=0;i<nbCol;i++)
+            for (int i = 0; i < nbCol; i++)
             {
-                for(int j=0; j<nbLin;j++)
+                for (int j = 0; j < nbLin; j++)
                 {
                     if (matBoard[i, j] == -1)
                         return false;
@@ -185,13 +225,17 @@ namespace Panothelo
 
         // privates methods
 
-        private void initBoard()
+
+        /// <summary>
+        /// Init the board
+        /// </summary>
+        private void InitBoard()
         {
             int condI = nbCol / 2;
             int condJ = nbLin / 2;
-            for (int i=0; i<nbCol;i++)
+            for (int i = 0; i < nbCol; i++)
             {
-                for(int j=0; j<nbLin;j++)
+                for (int j = 0; j < nbLin; j++)
                 {
                     if ((i == condI && j == condJ) || (i == condI + 1 && j == condJ + 1))
                     {
@@ -201,7 +245,7 @@ namespace Panothelo
                     else if ((i == condI + 1 && j == condJ) || (i == condI && j == condJ + 1))
                     {
                         matBoard[i, j] = 1;
-                        listTokenP2.Add(new int[]{ i, j});
+                        listTokenP2.Add(new int[] { i, j });
                     }
                     else
                         matBoard[i, j] = -1;
@@ -209,17 +253,32 @@ namespace Panothelo
             }
         }
 
-        private void swapToken(int col, int line, int stepI, int stepJ, int stopTok)
+        /// <summary>
+        /// Swap a pawn in the board
+        /// </summary>
+        /// <param name="col"></param>
+        /// <param name="line"></param>
+        /// <param name="stepI"></param>
+        /// <param name="stepJ"></param>
+        /// <param name="stopTok"></param>
+        private void SwapPawn(int col, int line, int stepI, int stepJ, int stopTok)
         {
             if (stopTok != matBoard[col, line])
             {
                 Console.WriteLine(col + " : " + line);
                 matBoard[col, line] = stopTok;
-                swapToken(col + stepI, line + stepJ, stepI, stepJ, stopTok);
+                SwapPawn(col + stepI, line + stepJ, stepI, stepJ, stopTok);
             }
         }
 
-        private bool checkLeft(int column, int line, bool isWhite)
+        /// <summary>
+        /// Check the left move
+        /// </summary>
+        /// <param name="column"></param>
+        /// <param name="line"></param>
+        /// <param name="isWhite"></param>
+        /// <returns></returns>
+        private bool CheckLeft(int column, int line, bool isWhite)
         {
             int tokenS = 0;
             int tokenE = 1;
@@ -244,7 +303,15 @@ namespace Panothelo
             }
             return false;
         }
-        private bool checkRight(int column, int line, bool isWhite)
+
+        /// <summary>
+        /// Check the right move
+        /// </summary>
+        /// <param name="column"></param>
+        /// <param name="line"></param>
+        /// <param name="isWhite"></param>
+        /// <returns></returns>
+        private bool CheckRight(int column, int line, bool isWhite)
         {
             int tokenS = 0;
             int tokenE = 1;
@@ -269,7 +336,15 @@ namespace Panothelo
             }
             return false;
         }
-        private bool checkTop(int column, int line, bool isWhite)
+
+        /// <summary>
+        /// Check the top move
+        /// </summary>
+        /// <param name="column"></param>
+        /// <param name="line"></param>
+        /// <param name="isWhite"></param>
+        /// <returns></returns>
+        private bool CheckTop(int column, int line, bool isWhite)
         {
             int tokenS = 0;
             int tokenE = 1;
@@ -294,7 +369,15 @@ namespace Panothelo
             }
             return false;
         }
-        private bool checkBottom(int column, int line, bool isWhite)
+
+        /// <summary>
+        /// Check the bottom move
+        /// </summary>
+        /// <param name="column"></param>
+        /// <param name="line"></param>
+        /// <param name="isWhite"></param>
+        /// <returns></returns>
+        private bool CheckBottom(int column, int line, bool isWhite)
         {
             int tokenS = 0;
             int tokenE = 1;
@@ -319,7 +402,15 @@ namespace Panothelo
             }
             return false;
         }
-        private bool checkDLT(int column, int line, bool isWhite)
+
+        /// <summary>
+        /// Check the diagonal left to top move
+        /// </summary>
+        /// <param name="column"></param>
+        /// <param name="line"></param>
+        /// <param name="isWhite"></param>
+        /// <returns></returns>
+        private bool CheckDiagLeftTop(int column, int line, bool isWhite)
         {
             int tokenS = 0;
             int tokenE = 1;
@@ -338,7 +429,7 @@ namespace Panothelo
             {
                 if (matBoard[column - s, line - s] == -1)
                     return false;
-                if (matBoard[column - s, line - s] == tokenE && s<2)
+                if (matBoard[column - s, line - s] == tokenE && s < 2)
                     return false;
                 else if (matBoard[column - s, line - s] == tokenS && !okMove)
                 {
@@ -349,7 +440,15 @@ namespace Panothelo
             }
             return false;
         }
-        private bool checkDLB(int column, int line, bool isWhite)
+
+        /// <summary>
+        /// Check the diagonal left to bottom move
+        /// </summary>
+        /// <param name="column"></param>
+        /// <param name="line"></param>
+        /// <param name="isWhite"></param>
+        /// <returns></returns>
+        private bool CheckDiagLeftBottom(int column, int line, bool isWhite)
         {
             int tokenS = 0;
             int tokenE = 1;
@@ -360,7 +459,7 @@ namespace Panothelo
                 tokenE = 0;
             }
             int it = 0;
-            if (nbLin-1-line < column)
+            if (nbLin - 1 - line < column)
                 it = nbLin - 1 - line;
             else
                 it = column;
@@ -379,7 +478,15 @@ namespace Panothelo
             }
             return false;
         }
-        private bool checkDRT(int column, int line, bool isWhite)
+
+        /// <summary>
+        /// Check the diagonal right to top move
+        /// </summary>
+        /// <param name="column"></param>
+        /// <param name="line"></param>
+        /// <param name="isWhite"></param>
+        /// <returns></returns>
+        private bool CheckDiagRightTop(int column, int line, bool isWhite)
         {
             int tokenS = 0;
             int tokenE = 1;
@@ -390,7 +497,7 @@ namespace Panothelo
                 tokenE = 0;
             }
             int it = 0;
-            if (line < nbCol- 1 - column)
+            if (line < nbCol - 1 - column)
                 it = line;
             else
                 it = nbCol - 1 - column;
@@ -407,10 +514,17 @@ namespace Panothelo
                 else if (matBoard[column + s, line - s] == tokenE && okMove)
                     return true;
             }
-            
             return false;
         }
-        private bool checkDRB(int column, int line, bool isWhite)
+
+        /// <summary>
+        /// Check the diagonal right to bottom move
+        /// </summary>
+        /// <param name="column"></param>
+        /// <param name="line"></param>
+        /// <param name="isWhite"></param>
+        /// <returns></returns>
+        private bool CheckDiagRightBottom(int column, int line, bool isWhite)
         {
             int tokenS = 0;
             int tokenE = 1;
@@ -441,19 +555,21 @@ namespace Panothelo
             return false;
         }
 
+        /// <summary>
+        /// Put a board to string for the save in XML
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
-            string strBoard = "";
-            //Put the board into a string
+            string boardToString = "";
             for (int i = 0; i < nbCol; i++)
             {
                 for (int j = 0; j < nbLin; j++)
                 {
-                    strBoard += matBoard[i, j] + ",";
+                    boardToString += matBoard[i, j] + ",";
                 }
             };
-
-            return strBoard;
+            return boardToString;
         }
     }
 }

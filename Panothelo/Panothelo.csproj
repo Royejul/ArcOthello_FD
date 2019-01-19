@@ -107,10 +107,6 @@
     <Resource Include="PawnImage\Panoramix.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="PawnImage\BlackPawn.png" />
-    <Resource Include="PawnImage\WhitePawn.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="PawnImage\Stump.png" />
   </ItemGroup>
   <ItemGroup>

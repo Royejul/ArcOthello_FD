@@ -13,15 +13,15 @@ namespace Panothelo
         public String Name { get; }
         public ImageBrush ImagePawn { get; set; }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="image"></param>
         public Player(String name, ImageBrush image)
         {
             this.Name = name;
             this.ImagePawn = image;
-        }
-
-        public override string ToString()
-        {
-            return Name;
         }
     }
 }
